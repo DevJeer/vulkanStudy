@@ -13,6 +13,7 @@ const uint32_t HEIGHT = 600;
 class HelloTriangleApplication 
 {
 public:
+	#pragma region RUNNING
 	void run() 
 	{
 		//初始化窗口
@@ -24,21 +25,23 @@ public:
 		//释放内存
 		cleanup();
 	}
-
+	#pragma endregion
 private:
+	//GLFW窗口
 	GLFWwindow* window;
-
+	//VULKAN实例
 	VkInstance instance;
 
-
+	//初始化窗口
 	void initWindow() 
 	{
 		glfwInit();
-
+		//显式地阻止GLFW自动创建Opengl上下文
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		//禁止窗口自动变化
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		window = glfwCreateWindow(WIDTH, HEIGHT, "MyApplication---Vulkan", nullptr, nullptr);
+		window = glfwCreateWindow(WIDTH, HEIGHT, "MyApplication---Vulkan_Init", nullptr, nullptr);
 	}
 
 	void initVulkan() 
@@ -46,7 +49,8 @@ private:
 		createInstance();
 	}
 
-	void mainLoop() 
+	//主循环DO SOMETHINGS
+	void mainLoop()
 	{
 		while (!glfwWindowShouldClose(window)) 
 		{
@@ -58,12 +62,12 @@ private:
 	{
 		//删除实例
 		vkDestroyInstance(instance, nullptr);
-
+		//删除当前的GLFW窗口
 		glfwDestroyWindow(window);
 
 		glfwTerminate();
 	}
-
+	//创建VULKAN实例
 	void createInstance()
 	{
 		VkApplicationInfo appInfo{};
@@ -74,15 +78,19 @@ private:
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_0;
 
+		//VULKAN instanceinfo
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
 
+
+		//获取全局扩展  类似于开启某个功能
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
 
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+		std::cout << *glfwExtensions << std::endl;
 
 		createInfo.enabledExtensionCount = glfwExtensionCount;
 		createInfo.ppEnabledExtensionNames = glfwExtensions;
@@ -123,6 +131,7 @@ int main()
 	}
 	catch (const std::exception& e) 
 	{
+		//返回错误信息
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
