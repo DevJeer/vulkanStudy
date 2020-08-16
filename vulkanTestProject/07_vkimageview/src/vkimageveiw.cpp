@@ -82,10 +82,14 @@ private:
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 
+	//swapchain somethings 
 	VkSwapchainKHR swapChain;
 	std::vector<VkImage> swapChainImages;
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
+
+	//创建vkimageview对象
+	//vulkan中vkimag对象都是通过imageview来访问的
 	std::vector<VkImageView> swapChainImageViews;
 
 	void initWindow() {
@@ -104,6 +108,7 @@ private:
 		pickPhysicalDevice();
 		createLogicalDevice();
 		createSwapChain();
+		//创建vkimageview
 		createImageViews();
 	}
 
@@ -115,6 +120,7 @@ private:
 
 	void cleanup() {
 		for (auto imageView : swapChainImageViews) {
+			//需要手动删除创建的vkimageview
 			vkDestroyImageView(device, imageView, nullptr);
 		}
 
@@ -319,7 +325,7 @@ private:
 		swapChainImageFormat = surfaceFormat.format;
 		swapChainExtent = extent;
 	}
-
+	//创建imageviews
 	void createImageViews() {
 		swapChainImageViews.resize(swapChainImages.size());
 
@@ -327,18 +333,24 @@ private:
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			createInfo.image = swapChainImages[i];
+			//指定图像数据的解释方式  这里
 			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			//指定imageview的格式
 			createInfo.format = swapChainImageFormat;
+			//components 进行图像颜色通道的映射
 			createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 			createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			//subresourceRange 指定图像的用途
+			//如果是编写VR一类的应用程序，可能会使用支持多个层次的交换链
+			//应该为每个图像创建多个图像视图，分别来访问左眼和右眼两个不同的图层
 			createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			createInfo.subresourceRange.baseMipLevel = 0;
 			createInfo.subresourceRange.levelCount = 1;
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
-
+			//vkCreateImageView为每个交换链图像创建图像视图
 			if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS) {
 				throw std::runtime_error("failed to create image views!");
 			}
